@@ -1,5 +1,4 @@
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -57,8 +56,8 @@ public class ExpEvaluator {
         int operand = eval();
         hs.put(var, operand);
         System.out.println(var + " = " + operand);
-       
-       // System.out.println(hs.toString());
+
+        // System.out.println(hs.toString());
 
     }
 
@@ -86,6 +85,14 @@ public class ExpEvaluator {
 
     int factor() {
         int x;
+        String temp = String.valueOf(inputToken);
+
+        if (hs.containsKey(temp)) {
+            x = hs.get(temp).intValue();
+            nextToken();
+            return x;
+        }
+
         switch (inputToken) {
             case '(':
                 nextToken();
