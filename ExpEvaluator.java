@@ -1,11 +1,16 @@
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Scanner;
 
 public class ExpEvaluator {
 
     private String s;
     private int currIndex;
     private char inputToken;
+    private HashMap<String, Integer> hs = new HashMap<String, Integer>();
 
-    public ExpEvaluator(String s) {
+    void ExpEvaluator(String s) {
         this.s = s.replaceAll("\\s", "");
         currIndex = 0;
         nextToken();
@@ -38,11 +43,22 @@ public class ExpEvaluator {
         }
     }
 
+    public void run(Scanner fs) {
+        while (fs.hasNextLine()) {
+            ExpEvaluator(fs.nextLine());
+            assignment();
+            s = "";
+        }
+    }
+
     void assignment() {
 
         String var = identifier();
         int operand = eval();
+        hs.put(var, operand);
         System.out.println(var + " = " + operand);
+       
+       // System.out.println(hs.toString());
 
     }
 
@@ -134,10 +150,13 @@ public class ExpEvaluator {
 
     public static void main(String[] args) {
 
-        String s = "var = --(2*2-1);";
-        ExpEvaluator ee = new ExpEvaluator(s);
+        try {
+            Scanner fReader = new Scanner(new FileInputStream(args[0]));
+            ExpEvaluator ee = new ExpEvaluator();
+            ee.run(fReader);
 
-        ee.assignment();
-
+        } catch (Exception e) {
+            System.out.println("ERROR: " + e);
+        }
     }
 }
