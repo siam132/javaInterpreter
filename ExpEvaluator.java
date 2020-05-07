@@ -9,7 +9,7 @@ public class ExpEvaluator {
     private char inputToken;
     private HashMap<String, Integer> hs = new HashMap<String, Integer>();
 
-    void ExpEvaluator(String s) {
+    void expEvaluator(String s) {
         this.s = s.replaceAll("\\s", "");
         currIndex = 0;
         nextToken();
@@ -19,7 +19,7 @@ public class ExpEvaluator {
     void nextToken() {
         char c;
         if (!s.endsWith(";"))
-            throw new RuntimeException("; Token exptected");
+            throw new RuntimeException("Missing ';' token exptected");
         c = s.charAt(currIndex++);
 
         inputToken = c;
@@ -29,7 +29,7 @@ public class ExpEvaluator {
         if (inputToken == token) {
             nextToken();
         } else {
-            throw new RuntimeException("syntax error");
+            throw new RuntimeException("Missing Parenthesis");
         }
     }
 
@@ -38,15 +38,14 @@ public class ExpEvaluator {
         if (inputToken == ';') {
             return x;
         } else {
-            throw new RuntimeException("syntax error");
+            throw new RuntimeException("Missing ';' token expected ");
         }
     }
 
     public void run(Scanner fs) {
         while (fs.hasNextLine()) {
-            ExpEvaluator(fs.nextLine());
+            expEvaluator(fs.nextLine());
             assignment();
-            s = "";
         }
     }
 
@@ -56,8 +55,6 @@ public class ExpEvaluator {
         int operand = eval();
         hs.put(var, operand);
         System.out.println(var + " = " + operand);
-
-        // System.out.println(hs.toString());
 
     }
 
@@ -84,37 +81,41 @@ public class ExpEvaluator {
     }
 
     int factor() {
-        int x;
+        int x = 0;
         String temp = String.valueOf(inputToken);
 
         if (hs.containsKey(temp)) {
             x = hs.get(temp).intValue();
             nextToken();
             return x;
+        } else if (inputToken == '(') {
+            nextToken();
+            x = exp();
+            match(')');
+            return x;
+        } else if (inputToken == '-') {
+            nextToken();
+            x = factor();
+            return -x;
+        } else if (inputToken == '+') {
+            nextToken();
+            x = factor();
+            return x;
+        } else if (inputToken == '0') {
+            nextToken();
+            if (Character.isDigit(inputToken))
+                throw new RuntimeException("ERROR !! Invalid value");
+            return 0;
+        }
+        temp = "";
+
+        while (Character.isDigit(inputToken)) {
+            temp += inputToken;
+            nextToken();
         }
 
-        switch (inputToken) {
-            case '(':
-                nextToken();
-                x = exp();
-                match(')');
-                return x;
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                x = Integer.parseInt(Character.toString(inputToken));
-                nextToken();
-                return x;
-            default:
-                throw new RuntimeException("syntax error");
-        }
+        return Integer.parseInt(temp);
+
     }
 
     String identifier() {
@@ -159,8 +160,8 @@ public class ExpEvaluator {
 
         try {
             Scanner fReader = new Scanner(new FileInputStream(args[0]));
-            ExpEvaluator ee = new ExpEvaluator();
-            ee.run(fReader);
+            ExpEvaluator expEval = new ExpEvaluator();
+            expEval.run(fReader);
 
         } catch (Exception e) {
             System.out.println("ERROR: " + e);
